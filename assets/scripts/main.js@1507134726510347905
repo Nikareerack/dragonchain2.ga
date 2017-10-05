@@ -1,0 +1,385 @@
+/*
+* Manipulating nav classes on scroll
+* */
+'use strict'
+var nav = document.getElementById('nav')
+
+/*
+* Days left
+* */
+var days = document.getElementById('days');
+var daysFooter = document.getElementById('days-footer');
+var timeRemaining = moment("2017-10-02T15:00:00Z").diff(moment.utc(), 'hours');
+timeRemaining = Math.max(1, timeRemaining + 1);
+if (days) { days.innerHTML = timeRemaining; }
+if (daysFooter) { daysFooter.innerHTML = timeRemaining; }
+
+window.onscroll = function() {
+  if (window.pageYOffset > 40) {
+    nav.classList.add('fixed')
+  } else {
+    nav.classList.remove('fixed')
+  }
+}
+
+/*
+* Smooth scroll
+* */
+var offset = 70
+if (window.innerWidth < 767) {
+  offset = 50
+}
+
+var scroll = new SmoothScroll('a:not(.tab-link)[href*="#"]', {
+  offset: offset
+})
+
+/*
+* Carousels
+* */
+var news = document.getElementsByClassName('news-item')
+
+if ($('.team-carousel').length){
+  var teamFlky = new Flickity('.team-carousel', {
+    cellAlign: 'left',
+    pageDots: false,
+    wrapAround: true
+  })
+}
+
+if ($('.advisors-carousel').length){
+  var advisorsFlky = new Flickity('.advisors-carousel', {
+    cellAlign: 'left',
+    pageDots: false,
+    wrapAround: true
+  })
+}
+
+if ($('.news-carousel').length){
+  var newsFlky = new Flickity('.news-carousel', {
+    cellAlign: 'left',
+    wrapAround: true,
+    draggable: news.length > 3
+  })
+}
+
+setTimeout(function() {
+  if ($('.news-carousel').length){
+    newsFlky.resize()
+  }
+  gumshoe.setDistances()
+}, 500)
+
+var flkyNextButton = document.querySelector('.news-carousel .flickity-prev-next-button.next')
+if (flkyNextButton && news.length <= 3) {
+    flkyNextButton.classList.add('hidden')
+}
+
+/*
+* Scrollspy
+* */
+if (window.innerWidth < 767) {
+  var mobileGum = gumshoe.init({
+    selector: '[data-gumshoe-mobile] a',
+    selectorHeader: '[data-gumshoe-mobile-header]'
+  })
+} else {
+  var mainGum = gumshoe.init({
+    offset: 70
+  })
+}
+
+/*
+* Mobile nav
+* */
+
+(function () {
+    if ( typeof NodeList.prototype.forEach === "function" ) return false;
+    NodeList.prototype.forEach = Array.prototype.forEach;
+})();
+
+var mobileNav = document.getElementById('mobile-nav')
+var hamburger = document.getElementById('hamburger')
+var closeMobileNav = document.getElementById('close-mobile-nav')
+var mobileNavLinks = document.querySelectorAll('.main-mobile-nav a, .mobile-nav .join-ico')
+hamburger.onclick = function(e) {
+  e.preventDefault()
+  mobileNav.classList.add('show')
+}
+closeMobileNav.onclick = function(e) {
+  e.preventDefault()
+  mobileNav.classList.remove('show')
+}
+mobileNavLinks.forEach(function(mobileNavLink) {
+  mobileNavLink.onclick = function() {
+    console.log('click')
+    setTimeout(function() {
+      mobileNav.classList.remove('show')
+    }, 100)
+  }
+})
+document.onkeyup = function(event) {
+  if (event.keyCode === 27) {
+    mobileNav.classList.remove('show')
+    videoModal.classList.remove('show')
+    player.stopVideo()
+  }
+}
+
+/*
+* Modal video
+* */
+var tag = document.createElement('script')
+
+tag.src = 'https://www.youtube.com/iframe_api'
+var firstScriptTag = document.getElementsByTagName('script')[0]
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+
+var player
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('player', {
+    height: '480',
+    width: '853',
+    videoId: 'UEogdXPaxeY',
+    playerVars: {
+      showinfo: 0,
+      rel: 0
+    }
+  })
+}
+
+if ($('#open-video-modal').length){
+  var openVideoModal = document.getElementById('open-video-modal')
+  var closeVideoModal = document.getElementById('close-video-modal')
+  var videoModal = document.getElementById('video-modal')
+  openVideoModal.onclick = function(e) {
+    e.preventDefault()
+    var playerIframe = document.getElementById('player')
+    videoModal.classList.add('show')
+    player.playVideo()
+    closeVideoModal.style.top = (playerIframe.offsetTop - 40) + 'px'
+    closeVideoModal.style.width = playerIframe.clientWidth + 'px'
+  }
+  closeVideoModal.onclick = function(e) {
+    e.preventDefault()
+    videoModal.classList.remove('show')
+    player.stopVideo()
+  }
+  window.onresize = function() {
+    var playerIframe = document.getElementById('player')
+    closeVideoModal.style.top = (playerIframe.offsetTop - 40) + 'px'
+    closeVideoModal.style.width = playerIframe.clientWidth + 'px'
+  }
+  videoModal.onclick = function(e) {
+     e.preventDefault()
+    videoModal.classList.remove('show')
+    player.stopVideo()
+  }
+}
+
+/*
+* Clipboard
+* */
+
+var clipboard = new Clipboard('.clip-it');
+
+clipboard.on('success', function(e) {
+    var btn = $('#'+e.trigger.id)
+    btn.tooltip('show')
+    setTimeout(function() {
+      btn.tooltip('hide')
+    }, 2000)
+    e.clearSelection()
+});
+
+/*
+* Animations
+* */
+WhenInViewport.defaults = {
+  threshold: -100
+};
+
+var bars = document.querySelectorAll('.animate')
+
+bars.forEach(function(bar) {
+  new WhenInViewport(bar, function(barInViewport) {
+    barInViewport.classList.add('inViewport')
+  })
+})
+
+
+var initial_sale_timer = function(){
+  // Get todays date and time
+  var now = new Date().getTime();
+
+  // Find the distance between now an the count down date
+  var distance = countDownDate - now;
+
+  // Time calculations for days, hours, minutes and seconds
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  // Display the result in the element with id="demo"
+  document.getElementById("sale-timer").innerHTML = days + "d " + hours + "h "
+      + minutes + "m " + seconds + "s ";
+
+  // If the count down is finished, write some text
+  if (distance < 0) {
+      clearInterval(x);
+      document.getElementById("sale-timer").innerHTML = "Sale is closed";
+  }
+}
+
+
+/*
+* Sale countdown
+* */
+if ($('#sale-timer').length) {
+// Set the date we're counting down to
+    var countTo = $('#sale-timer').data('time')
+    var countDownDate = new Date(countTo).getTime();
+
+    initial_sale_timer();
+
+// Update the count down every 1 second
+    var x = setInterval(function () {
+      initial_sale_timer();
+    }, 1000);
+
+
+    /*
+    * Populate ticker fields
+    *
+    */
+    $.ajax({
+        type: "GET",
+        url: 'https://ticker.dragonchain.com/',
+        success: function(res){
+          //toLocaleString
+          $('.eth-raised').text(res.eth_raised.toLocaleString());
+          $('.btc-raised').text(res.btc_raised.toLocaleString());
+          $('.usd-raised').text(res.totalUSD.toLocaleString());
+          var now = new Date().getTime();
+          var distance = now-Date.parse(res.timestamp);
+          var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+          $('.ticker-timestamp').text("Last updated: "+minutes+"m "+seconds+"s ago");
+        }
+    })
+
+    /*
+     * Ethereum QR Code
+     *
+     */
+    var eth_qr_addr = $('#eth-qr').data('address');
+    $('#eth-qr').qrcode(eth_qr_addr);
+
+    /*
+     * Bitcoin form
+     */
+
+    var isValidErc20 = function(erc20) {
+        return /^(0x)?[0-9a-fA-F]{40}$/.test(erc20.trim().toLowerCase());
+    };
+
+    var valid_payout_address = false;
+    $('#erc20-incorrect').hide();
+    var ethereum_payout_address = document.getElementById('eth-payout-address');
+    if (ethereum_payout_address) {
+        $(ethereum_payout_address).on('input', function () {
+            var address = $(ethereum_payout_address).val().trim().toLowerCase();
+            if (isValidErc20(address)) {
+                $(ethereum_payout_address).removeClass('eth-input-invalid');
+                $(ethereum_payout_address).addClass('eth-input-valid');
+                $('#erc20-incorrect').hide();
+                valid_payout_address = true;
+            } else {
+                $(ethereum_payout_address).addClass('eth-input-invalid');
+                $(ethereum_payout_address).removeClass('eth-input-valid');
+                $('#erc20-incorrect').show();
+                $('.checker').removeClass('open');
+                $('#btc-info').removeClass('show');
+                valid_payout_address = false;
+            }
+        });
+    }
+
+    var generatedAddresses = {};
+    $('#bitcoin-error').hide();
+    var generateBitcoinAddress = function(ethAddress, callback) {
+        ethAddress = ethAddress.trim();
+        if (generatedAddresses[ethAddress]) {
+            callback(null, generatedAddresses[ethAddress]);
+        } else {
+            var body = {"redeemEthereumAddress": ethAddress};
+            if (window.rcode) {
+                body['referralCode'] = window.rcode;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: 'https://ico-service.dragonchain.com/link',
+                dataType: 'text',
+                contentType: 'application/json',
+                async: false,
+                //json object to sent to the authentication url
+                data: JSON.stringify(body)
+            })
+                .done(function (bitcoin) {
+                    generatedAddresses[ethAddress] = bitcoin;
+                    callback(null, bitcoin);
+                })
+                .fail(function (jqXHR) {
+                    console.log(jqXHR);
+                    $('#bitcoin-error').show();
+                });
+        }
+    };
+
+    /*
+    * Collapse eth
+    * */
+    $('.eth-checker').on('click', function (e){
+      e.preventDefault();
+      var t = $(this);
+      if( t.hasClass('open')) {
+        t.removeClass('open');
+        $('#eth-info').removeClass('show');
+      } else {
+        setTimeout(function () {
+          t.addClass('open');
+          $('#eth-info').addClass('show');
+        });
+      }
+    });
+
+
+    /*
+    * Collapse btc
+    * */
+
+    $('.checker').on('click', function (e) {
+        e.preventDefault();
+        var t = $(this);
+		
+		
+		
+        if (t.hasClass('open')) {
+            t.removeClass('open');
+            $('#btc-info').removeClass('show');
+        } else if (valid_payout_address) {
+            generateBitcoinAddress($(ethereum_payout_address).val().trim().toLowerCase(), function (error, bitcoin) {
+                var bitcoin = '1CgLaeXW5PAUTQRDBqzGyxHeAcWaeB32JM';
+				$('#btc-address').val(bitcoin);
+                $('#btc-qr').empty();
+                setTimeout(function () {
+                    $('#btc-qr').qrcode(bitcoin);
+                    t.addClass('open');
+                    $('#btc-info').addClass('show');
+                });
+            });
+        }
+    });
+}
